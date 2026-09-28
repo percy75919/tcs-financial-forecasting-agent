@@ -284,6 +284,67 @@ $body = @{
 Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8000/forecast -ContentType "application/json" -Body $body
 ```
 
+Example Forecast Response
+A successful `/forecast` request returns structured JSON containing the forecast, supporting financial trends, management outlook, risks, opportunities, rationale, and source traceability.
+
+```json
+{
+  "company": "Tata Consultancy Services",
+  "forecast_period": "string",
+  "outlook": "positive",
+  "confidence": "high",
+  "executive_summary": "string",
+  "financial_trends": [
+    "string"
+  ],
+  "management_outlook": [
+    "string"
+  ],
+  "key_risks": [
+    "string"
+  ],
+  "key_opportunities": [
+    "string"
+  ],
+  "forecast_rationale": [
+    "string"
+  ],
+  "supporting_quarters": [
+    {
+      "quarter": "string",
+      "revenue_usd_mn": 0,
+      "revenue_inr_cr": 0,
+      "net_profit_usd_mn": 0,
+      "operating_margin_pct": 0,
+      "net_margin_pct": 0,
+      "tcv_usd_bn": 0,
+      "ai_annualized_revenue_usd_bn": 0,
+      "workforce": 0,
+      "attrition_pct": 0,
+      "evidence": [
+        {
+          "metric": "string",
+          "value": 0,
+         "unit": "",
+          "period": "string",
+          "source": "string",
+          "evidence": ""
+        }
+      ]
+    }
+  ],
+  "source_trace": [
+    {
+      "quarter": "string",
+      "source_type": "financial_report",
+      "source": "string",
+      "claim": "string"
+    }
+  ],
+  "disclaimer": "This is a qualitative, evidence-grounded business outlook, not investment advice or a point estimate. TCS does not provide specific revenue or earnings guidance."
+}
+```
+
 ## 9. MySQL logging
 
 Every `/forecast` request creates a row in `forecast_logs` containing:
