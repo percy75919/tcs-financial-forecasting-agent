@@ -1,22 +1,43 @@
-from app.tools.financial_data_extractor import _first_float, _last_float_row
+from app.tools.financial_data_extractor import _table_metrics
 
 
-def test_first_float_matches_common_tcs_formats():
-    text = "Revenue at US$ 7,624 million; Operating Margin at 24.0%; TCV: US$ 9.5 billion"
-    assert _first_float([r"Revenue at US\$\s*([\d,]+)\s*million"], text) == 7624
-    assert _first_float([r"Operating Margin at\s*([\d.]+)%"], text) == 24.0
-    assert _first_float([r"TCV[^$]{0,40}US\$\s*([\d.]+)\s*billion"], text) == 9.5
-
-
-def test_quarterly_table_uses_final_period_value():
-    text = """
-    For the three-month periods ended Mar 31, 2025, Dec 31, 2025 and Mar 31, 2026
-    Revenue | 7,465 | 7,509 | 7,621
-    Net income | 1,418 | 1,503 | 1,479
+def test_html_ifrs_table_extracts_latest_quarter_values():
+    html = """
+    <table>
+        <tr>
+            <th></th>
+            <th>Three-month period ended Mar 31, 2025</th>
+            <th>Dec 31, 2025</th>
+            <th>Mar 31, 2026</th>
+        </tr>
+        <tr>
+            <td>Revenue</td>
+            <td>7,465</td>
+            <td>7,509</td>
+            <td>7,621</td>
+        </tr>
+        <tr>
+            <td>Cost of revenue</td>
+            <td>4,570</td>
+            <td>4,444</td>
+            <td>4,517</td>
+        </tr>
+        <tr>
+            <td>Operating income</td>
+            <td>1,807</td>
+            <td>1,889</td>
+            <td>1,927</td>
+        </tr>
+        <tr>
+            <td>Net income</td>
+            <td>1,418</td>
+            <td>1,503</td>
+            <td>1,479</td>
+        </tr>
+    </table>
     """
-    assert _last_float_row(
-        [r"Revenue\s*\|\s*([\d,]+)\s*\|\s*([\d,]+)\s*\|\s*([\d,]+)"], text
-    ) == 7621
-    assert _last_float_row(
-        [r"Net income\s*\|\s*([\d,]+)\s*\|\s*([\d,]+)\s*\|\s*([\d,]+)"], text
-    ) == 1479
+
+    revenue, net_income = _table_metrics(html)
+
+    assert revenue == 7621
+    assert net_income == 1479
