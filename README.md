@@ -284,7 +284,7 @@ $body = @{
 Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8000/forecast -ContentType "application/json" -Body $body
 ```
 
-Example Forecast Response
+Example Forecast Response:
 A successful `/forecast` request returns structured JSON containing the forecast, supporting financial trends, management outlook, risks, opportunities, rationale, and source traceability.
 
 ```json
