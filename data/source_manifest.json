@@ -1,0 +1,21 @@
+{
+  "company": "Tata Consultancy Services",
+  "updated_for": "2026-09-28",
+  "quarters": {
+    "Q1_FY27": {
+      "financial_report_url": "https://www.tcs.com/who-we-are/newsroom/press-release/tcs-financial-results-q1-fy-2027",
+      "transcript_url": "https://www.tcs.com/content/dam/tcs/investor-relations/financial-statements/2026-27/q1/Management%20Commentary/Transcript%20of%20the%20Q1%202026-27%20Earnings%20Conference%20Call%20held%20on%20Jul%209%2C%202026.pdf",
+      "period_end": "2026-06-30"
+    },
+    "Q4_FY26": {
+      "financial_report_url": "https://www.tcs.com/who-we-are/newsroom/press-release/tcs-financial-results-q4-fy-2026",
+      "transcript_url": "https://www.tcs.com/content/dam/tcs/investor-relations/financial-statements/2025-26/q4/Management%20Commentary/Transcript%20of%20the%20Q4%202025-26%20Earnings%20Conference%20Call%20held%20at%201900%20hrs%20IST%20on%20April%209%2C%202026.pdf",
+      "period_end": "2026-03-31"
+    },
+    "Q3_FY26": {
+      "financial_report_url": "https://www.tcs.com/who-we-are/newsroom/press-release/tcs-financial-results-q3-fy-2026",
+      "transcript_url": "https://www.tcs.com/content/dam/tcs/investor-relations/financial-statements/2025-26/q3/Management%20Commentary/Transcript%20of%20the%20Q3%202025-26%20Earnings%20Conference%20Call%20held%20on%20Jan%2012%2C%202026.pdf",
+      "period_end": "2025-12-31"
+    }
+  }
+}
