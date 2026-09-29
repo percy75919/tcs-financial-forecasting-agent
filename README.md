@@ -38,7 +38,7 @@ MySQL final-output log
 
 The design intentionally separates deterministic financial extraction from semantic transcript analysis. This reduces the chance that the LLM invents a number that should have been read from a filing. The application can run fully locally: Ollama provides the final chat model, while FastEmbed provides local transcript embeddings.
 
-The agent is asked to use both tools before returning a result. LangChain's current `create_agent` factory supports a tool-calling loop and structured response output; the project uses a Pydantic response schema so the HTTP response is machine-readable. See the current LangChain reference for `create_agent` and structured responses.
+The application executes both specialist tools deterministically before the final synthesis step. LangChain is used for tool definitions, prompt management, the Ollama chat integration, and Pydantic structured output. This keeps the evidence chain explicit while ensuring the HTTP response is machine-readable.
 
 ## 2. Source documents
 
@@ -80,7 +80,7 @@ Pipeline:
 1. Download official transcripts as PDFs.
 2. Extract text with PyMuPDF.
 3. Split into overlapping chunks.
-4. Embed with the local Sentence-Transformers model `sentence-transformers/all-MiniLM-L6-v2`.
+4. Embed with the local FastEmbed model `BAAI/bge-small-en-v1.5` through ONNX Runtime.
 5. Persist vectors in a local Chroma collection.
 6. Run multiple semantic queries covering demand, AI monetization, risks and margin pressure.
 7. Send the retrieved evidence to an LLM subagent for a compact qualitative synthesis.
@@ -106,7 +106,7 @@ The service returns concise forecast rationales rather than hidden reasoning tra
 | Layer | Technology | Why |
 |---|---|---|
 | API | FastAPI | Small, typed HTTP service |
-| Agent orchestration | LangChain `create_agent` | Tool-calling loop + structured output |
+| Agent orchestration | LangChain tool abstractions + structured output | Explicit two-tool orchestration and typed JSON output |
 | LLM | Ollama `ChatOllama` via `langchain-ollama` | Local tool calling and structured generation without API credits |
 | Embeddings | FastEmbed `BAAI/bge-small-en-v1.5` (local, ONNX Runtime) | Avoids OpenAI embedding charges and keeps transcript text local during embedding |
 | Vector DB | Chroma via `langchain-chroma` | Local persistent RAG store |
@@ -148,7 +148,7 @@ The final response is a `ForecastResponse` JSON object containing:
 - Tool outputs include source URLs and evidence snippets.
 - Pydantic enforces the final response schema.
 - The LLM temperature is set to 0 for the synthesis path.
-- A single bounded retry is used on agent failures.
+- Tool or model failures are surfaced as explicit application errors rather than silently replacing missing evidence.
 - The prompt prohibits invented numbers and distinguishes management statements from independent facts.
 - Missing or conflicting evidence is expected to reduce confidence rather than be silently filled in.
 
@@ -160,7 +160,7 @@ Run:
 pytest -q
 ```
 
-The included tests validate regex extraction behavior, the structured response contract and the API health endpoint. For a stronger submission, add snapshot tests against a frozen copy of the TCS source documents and a small human-annotated rubric for theme extraction.
+The implemented verification covers extraction behavior, the structured response contract and the API health endpoint. In addition, the final local validation exercised the real TCS quarter extractor for Q1 FY27, Q4 FY26 and Q3 FY26, a successful `/forecast` request returning HTTP 200, and MySQL persistence of the successful request and final JSON output.
 
 ## 7. Setup
 
@@ -375,7 +375,7 @@ For a production deployment, add:
 
 1. **Qualitative, not a precise numeric earnings model.** This matches the requirement for a reasoned business outlook but is not a substitute for a full bottoms-up financial model.
 2. **Official-source availability.** The service depends on TCS pages/PDFs being reachable. The design fails loudly on missing source data to avoid hallucination.
-3. **Embedding cost vs. retrieval quality.** The project uses a local Sentence-Transformers model to avoid OpenAI embedding charges. The tradeoff is a larger local dependency/model download and CPU inference during ingestion/querying.
+3. **Embedding cost vs. retrieval quality.** The project uses the local FastEmbed model `BAAI/bge-small-en-v1.5` through ONNX Runtime to avoid OpenAI embedding charges. The tradeoff is a local model download and CPU inference during ingestion/querying.
 4. **Chroma is intentionally local.** This makes the assignment easy to run but is not a distributed production vector database.
 5. **No OCR by default.** Most TCS investor documents expose a text layer. OCR should be added only for image-only documents.
 6. **Management outlook is not a formal earnings forecast.** TCS explicitly states that it does not provide specific revenue or earnings guidance; the agent therefore frames management commentary as directional evidence.
@@ -388,7 +388,7 @@ The Q1 FY27 published results reported revenue of US$7.624 billion, 24.0% operat
 
 Q4 FY26 reported revenue of US$7.621 billion and operating margin of 25.3%, with TCV of US$12.0 billion. Q3 FY26 reported revenue of US$7.509 billion, 25.2% operating margin and US$9.3 billion TCV.
 
-These values are included here only as a verified reference snapshot; the application itself is designed to retrieve the documents dynamically.
+These values are included here only as a verified reference snapshot; the application itself automatically retrieves the configured TCS source documents during ingestion and caches them locally.
 
 ## Windows/Python 3.14 troubleshooting
 
